@@ -19,9 +19,9 @@ class Login{
                     username   : user[0].username
                 }
                 console.log(payload);
-                user[0].token = jwt.sign(payload,process.env.SECRET)
-                console.log(user[0].TOKEN);
-                res.status(200).json({msg:'token created'})
+                let token = jwt.sign(payload,process.env.SECRET)
+
+                res.status(200).json({msg:'token created',token:token})
             }else{
                 res.status(401).json({msg:"incorrect password"})
             }
