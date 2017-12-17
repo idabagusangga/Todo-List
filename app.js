@@ -5,10 +5,21 @@ var path = require('path');
 // var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var index = require('./routes/index');
+var todos = require('./routes/todos');
 var users = require('./routes/users');
 
 var app = express();
+var mongoose = require('mongoose');
+require('dotenv').config();
+mongoose.connect(`mongodb://angga:${process.env.PASSWORD}@ds135926.mlab.com:35926/library`);
+
+//db connection status
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log('MLABS Connected');
+});
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
@@ -19,10 +30,10 @@ var app = express();
 // app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+// app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+app.use('/', todos);
 app.use('/users', users);
 
 // catch 404 and forward to error handler
