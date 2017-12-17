@@ -1,9 +1,14 @@
 var express = require('express');
 var router = express.Router();
-
+const todoController = require('../controller/todos');
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.status(200).json({ title: 'Express' });
-});
+
+//editTodo
+router.post('/:id',todoController.editTodo)
+router.delete('/:id',todoController.destroyTodo)
+
+
+//deleteTodo
+
 
 module.exports = router;
