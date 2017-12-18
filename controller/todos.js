@@ -1,10 +1,14 @@
 const User = require('../models/user')
 const Todo = require('../models/todo');
+const jwt = require('jsonwebtoken');
 
 class TodoController{
     static findAllTodo(req,res){
         console.log('masuk sini');
-        User.findById(req.params.id).populate(['todoList'])
+        console.log(req.headers.token);
+        let decoded = jwt.verify(req.headers.token,process.env.SECRET)
+            console.log(decoded);
+        User.findById(decoded.id).populate(['todoList'])
         .then(user=>{
             res.status(200).json({
                 msg: "user todo list",
@@ -16,7 +20,9 @@ class TodoController{
         })
     }
     static createTodo(req,res){
-        User.findById(req.params.id)
+        let decoded = jwt.verify(req.headers.token,process.env.SECRET)
+            console.log(decoded);
+        User.findById(decoded.id)
         .then(user=>{
             console.log('ini data user===============',user);
             let newTodo = new Todo({
@@ -45,6 +51,8 @@ class TodoController{
         })
     }
     static editTodo(req,res){
+        let decoded = jwt.verify(req.headers.token,process.env.SECRET)
+            console.log(decoded);
         Todo.findById(req.params.id)
         .then(todo=>{
             todo.task = req.body.task || todo.task
@@ -70,7 +78,9 @@ class TodoController{
         })
     }
     static destroyTodo(req,res){
-        Todo.findByIdAndRemove(req.params.id)
+        let decoded = jwt.verify(req.headers.token,process.env.SECRET)
+            console.log(decoded);
+        Todo.findByIdAndRemove(decoded.id)
         .then(result=>{
             res.status(200).json({msg:"task deleted"})
         })
