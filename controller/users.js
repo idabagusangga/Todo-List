@@ -1,6 +1,21 @@
 const User = require('../models/user')
+const jwt = require('jsonwebtoken');
 
 class UserController{
+    static findUser(req,res){
+        console.log(req.body);
+        let decoded = jwt.verify(req.body.token,process.env.SECRET)
+            console.log(decoded);
+    
+        User.findById(decoded.id).populate(['todoList'])
+        .then(response=>{
+            res.status(200).json({response:response})
+        })
+        .catch(err=>{
+            console.log(err);
+            res.status(500).json({err:err})
+        })
+    }
     static findAll(req,res){
         User.find()
         .then(users=>{
@@ -23,6 +38,7 @@ class UserController{
             res.status(200).json({message:"New User Created",userData:user})
         })
         .catch(err=>{
+            console.log(err);
             res.status(200).json({err: err})
         })
     }
