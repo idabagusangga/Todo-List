@@ -6,6 +6,7 @@ let todoSchema = new Schema({
     task        : String,
     status      : String,
     importance  : String,
+    reminder    : String,
     createdAt   : {
         type    : Date,
         default : new Date()

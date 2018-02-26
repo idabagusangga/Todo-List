@@ -8,6 +8,10 @@ var bodyParser = require('body-parser');
 var jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt');
 const cors = require('cors');
+const scheduler = require('./helper/cronjob')
+
+
+
 
 
 var todos = require('./routes/todos');
@@ -27,16 +31,13 @@ db.once('open', function() {
   console.log('MLABS Connected');
 });
 
-// view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-// app.use(logger('dev'));
+scheduler.start()
+
+
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors())

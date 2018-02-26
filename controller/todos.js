@@ -1,6 +1,7 @@
 const User = require('../models/user')
 const Todo = require('../models/todo');
 const jwt = require('jsonwebtoken');
+const moment = require('moment')
 
 class TodoController{
     static findAllTodo(req,res){
@@ -37,21 +38,29 @@ class TodoController{
         if(decoded){
             console.log(decoded);
             console.log(req.body);
-            User.findById(decoded.id)
+            User.findById(decoded.id).populate(['todoList'])
             .then(user=>{
+              
                 let newTodo = new Todo ({
                     task : req.body.task,
-                    importance:req.body.importance,
-                    status:req.body.importance
+                    status:'incomplete',
+                    reminder: moment().add(Number(req.body.reminder), 'minutes').format()
                 })
-                console.log(newTodo.importance);
+                // console.log(newTodo.importance);
                 newTodo.save()
                 .then(todo=>{
                     user.todoList.push(todo._id)
                     user.save()
                     .then(result=>{
-                        console.log(result);
-                        res.status(200).json({result:result})
+                        User.findById(decoded.id).populate(['todoList'])
+                        .then(userData => {
+                          res.status(200).json({
+                            userData: userData
+                          })
+                        })
+                        .catch(err => {
+                          console.log(err);
+                        })
                     })
                     .catch(err=>{
                         console.log(err);
@@ -65,69 +74,52 @@ class TodoController{
                 console.log(err);
             })
         }
-    
-    
-        // User.findById(decoded.id)
-        // .then(user=>{
-        //     console.log('ini data user===============',user);
-        //     let newTodo = new Todo({
-        //         task        : req.body.task,
-        //         status      : req.body.status,
-        //         importance  : req.body.importance
-        //     })
-        //     newTodo.save()
-        //     .then(todo=>{
-        //         console.log('ini data todo ==========',todo);
-        //         user.todoList.push(todo._id) 
-        //         user.save()
-        //         .then(result=>{
-        //             res.status(200).json({msg:'added task to user', taskID: result})
-        //         })
-        //         .catch(err=>{
-        //             res.status(500).json({msg:'catch error in then newTODOs save' , err:err})
-        //         })
-        //     })
-        //     .catch(err=>{
-        //         res.status(500).json({err:err})
-        //     })
-        // })
-        // .catch(err=>{
-        //     res.status(500).json({err:err})
-        // })
     }
     static editTodo(req,res){
-        let decoded = jwt.verify(req.headers.token,process.env.SECRET)
+        let decoded = jwt.verify(req.body.token,process.env.SECRET)
             console.log(decoded);
         Todo.findById(req.params.id)
         .then(todo=>{
             todo.task = req.body.task || todo.task
             todo.status = req.body.status || todo.status
-            todo.importance = req.body.importance || todo.importance
+            todo.reminder = moment().add(Number(req.body.reminder), 'minutes').format() || todo.reminder
             todo.save()
             .then(result=>{
-                res.status(200).json({
-                    msg     : 'task updated',
-                    task    : result
+                User.findById(decoded.id).populate(['todoList'])
+                .then(response => {
+                  res.status(200).json({
+                    data: response
+                  })
+                })
+                .catch(err => {
+                  res.status(500).json({
+                    err: err
+                  })
                 })
             })
             .catch(err=>{
-                res.status(500).json({
-                    error : err
-                })
-            })
+                console.log(err)
+              })
         })
         .catch(err=>{
-            res.status(500).json({
-                error:err
-            })
+            console.log(err);
         })
+      
     }
     static destroyTodo(req,res){
-        // let decoded = jwt.verify(req.headers.token,process.env.SECRET)
-        //     console.log(decoded);
+        let decoded = jwt.verify(req.headers.token,process.env.SECRET)
+            console.log(decoded);
         Todo.findByIdAndRemove(req.params.id)
         .then(result=>{
-            res.status(200).json({msg:"task deleted",result:result})
+          User.findById(decoded.id).populate(['todoList'])
+            .then(response => {
+              res.status(200).json({
+                data: response
+              })
+            })
+            .catch(err => {
+              console.log(err)
+            })
         })
         .catch(err=>{
             res.status(500).json({err:err})

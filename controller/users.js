@@ -17,8 +17,9 @@ class UserController{
         })
     }
     static findAll(req,res){
-        User.find()
+        User.find().populate(['todoList'])
         .then(users=>{
+          console.log(users[0].todoList[0].reminder);
             res.status(200).json({title:"User Collection" , dataUser:users})
         })
         .catch(err=>{
